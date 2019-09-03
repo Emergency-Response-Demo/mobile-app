@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:chakracore-10.13.0
+      - image: circleci/node:dubnium
     steps:
       - checkout
       - run:

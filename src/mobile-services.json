@@ -3,20 +3,5 @@
   "namespace": "mobile-developer-console",
   "version": 1,
   "clusterName": "test",
-  "services": [
-    {
-      "config": {
-        "auth-server-url": "https://sso-user-sso.apps.demo-1762.open.redhat.com/auth",
-        "confidential-port": 0,
-        "public-client": true,
-        "realm": "app1-realm",
-        "resource": "app1-client",
-        "ssl-required": "external"
-      },
-      "id": "fba3edde-d49a-11e9-be3a-025c402b324e",
-      "name": "keycloak",
-      "type": "keycloak",
-      "url": "https://sso-user-sso.apps.demo-1762.open.redhat.com/auth"
-    }
-  ]
+  "services": []
 }

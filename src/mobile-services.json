@@ -1,0 +1,7 @@
+{
+  "clientId": "app1",
+  "namespace": "mobile-developer-console",
+  "version": 1,
+  "clusterName": "test",
+  "services": []
+}

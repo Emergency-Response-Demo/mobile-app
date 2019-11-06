@@ -16,9 +16,13 @@ app.use(express.static(path.join(__dirname, 'www')));
 
 let server = http.createServer(app);
 app.get('/env.js', (_, res) => {
+  let serverUrl = process.env.SERVER_URL;
+  if (serverUrl && serverUrl.endsWith('/')) {
+    serverUrl = serverUrl.slice(0, serverUrl.length -1);
+  }
   const envData = `window.__env = {
     accessToken: '${process.env.TOKEN}',
-    serverUrl: '${process.env.SERVER_URL}'
+    serverUrl: '${serverUrl}'
   }`;
   res.send(envData);
 });

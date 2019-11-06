@@ -7,7 +7,6 @@ import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { KeycloakAngularModule } from 'keycloak-angular';
-import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 
 import { AG_CONFIG } from './app.config';
 import { AppComponent } from './app.component';
@@ -16,8 +15,9 @@ import { init, AppInitService }  from "./app-init.service";
 import mobileServicesJson from '../mobile-services.json';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 
-const config: SocketIoConfig = { url: window['__env'].serverUrl, options: {} };
+const config: SocketIoConfig = { url: null, options: { autoConnect: false } };
 
 @NgModule({
   declarations: [AppComponent],

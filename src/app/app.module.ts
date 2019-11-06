@@ -14,13 +14,15 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { init, AppInitService }  from "./app-init.service";
 import mobileServicesJson from '../mobile-services.json';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 
 const config: SocketIoConfig = { url: window['__env'].serverUrl, options: {} };
 
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
-  imports: [BrowserModule, HttpClientModule, IonicModule.forRoot(), AppRoutingModule, SocketIoModule.forRoot(config), KeycloakAngularModule],
+  imports: [BrowserModule, HttpClientModule, IonicModule.forRoot(), AppRoutingModule, SocketIoModule.forRoot(config), KeycloakAngularModule, ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })],
   providers: [
     StatusBar,
     SplashScreen,

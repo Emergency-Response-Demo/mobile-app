@@ -56,9 +56,6 @@ workflows:
       - container_latest:
           requires:
             - build_and_test
-          filters:
-            tags:
-              only: /.*/
       - container_master:
           requires:
             - build_and_test

@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  build_and_test:
     working_directory: ~/mobile-app
     docker:
       - image: circleci/node:10-browsers
@@ -14,7 +14,7 @@ jobs:
           paths:
             - "node_modules"
       - run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
-
+  
   container_latest:
     working_directory: ~/mobile-app
     docker:
@@ -49,22 +49,23 @@ workflows:
   version: 2
   build_and_push:
     jobs:
+      - build_and_test
       - container_latest:
           requires:
-            - build
+            - build_and_test
           filters:
             tags:
               only: /.*/
       - container_master:
           requires:
-            - build
+            - build_and_test
           filters:
             branches:
               only:
                 - master
       - container_release:
           requires:
-            - build
+            - build_and_test
           filters:
             tags:
               only: /\d\.\d\.\d(.*?)/

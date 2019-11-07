@@ -14,3 +14,61 @@ jobs:
           paths:
             - "node_modules"
       - run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+
+  container_latest:
+    working_directory: ~/mobile-app
+    docker:
+      - image: circleci/node:10
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: make container_build_latest
+      - run: make container_push_latest
+
+  container_master:
+    working_directory: ~/mobile-app
+    docker:
+      - image: circleci/node:10
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: make container_build_master
+      - run: make container_push_master
+
+  container_release:
+    working_directory: ~/mobile-app
+    docker:
+      - image: circleci/node:10
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: make container_build_release
+      - run: make container_push_release
+
+workflows:
+  version: 2
+  build_and_push:
+    jobs:
+      - container_latest:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
+      - container_master:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+      - container_release:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /\d\.\d\.\d(.*?)/
+            branches:
+              ignore: /.*/
+
+  

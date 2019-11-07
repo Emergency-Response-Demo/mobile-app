@@ -49,7 +49,10 @@ workflows:
   version: 2
   build_and_push:
     jobs:
-      - build_and_test
+      - build_and_test:
+          filters:
+            tags:
+              only: /.*/
       - container_latest:
           requires:
             - build_and_test

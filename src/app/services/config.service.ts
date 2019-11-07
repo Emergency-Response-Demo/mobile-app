@@ -7,9 +7,16 @@ import { AG_CONFIG } from '../app.config';
 })
 export class MobileServiceConfigurations {
   agCoreConfig: ConfigurationService;
+  envs: Object = {}
 
   constructor(@Inject(AG_CONFIG) config: AeroGearConfiguration){
     this.agCoreConfig = new ConfigurationService(config);
+    const browserWindow = window['__env'] || {};
+    for (const key in browserWindow) {
+      if (browserWindow.hasOwnProperty(key)) {
+        this.envs[key] = browserWindow[key];
+      }
+    }
   }
 
   getKeycloakConfig() {
@@ -18,5 +25,13 @@ export class MobileServiceConfigurations {
       return keycloakConfigs[0];
     } 
     return null;
-  }  
+  }
+
+  getAccessToken() {
+    return this.envs['accessToken'];
+  }
+
+  getServerUrl() {
+    return this.envs['serverUrl'];
+  }
 }

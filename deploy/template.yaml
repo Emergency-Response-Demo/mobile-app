@@ -1,0 +1,92 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: emergency-response-mobile-app
+objects:
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: emergency-response-mobile-app
+    name: emergency-response-mobile-app
+  spec:
+    replicas: 1
+    selector:
+      app: emergency-response-mobile-app
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: emergency-response-mobile-app
+      spec:
+        containers:
+        - env:
+          - name: TOKEN
+            value: "${MAPBOX_TOKEN}"
+          - name: SERVER_URL
+            value: "${CONSOLE_SERVER_URL}"
+          image: docker.io/weilee/emergency-response-mobile-app:prod
+          imagePullPolicy: Always
+          name: emergency-response-mobile-app
+          ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          resources: {}
+          securityContext:
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: emergency-response-mobile-app
+    name: emergency-response-mobile-app
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: emergency-response-mobile-app
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: emergency-response-mobile-app
+    name: emergency-response-mobile-app
+  spec:
+    port:
+      targetPort: http
+    tls:
+      termination: edge
+    to:
+      kind: Service
+      name: emergency-response-mobile-app
+      weight: 100
+    wildcardPolicy: None
+parameters:
+  - name: MAPBOX_TOKEN 
+    displayName: Token for MapBox 
+    required: true 
+  - name: CONSOLE_SERVER_URL
+    displayName: URL of the emergency response console
+    required: true

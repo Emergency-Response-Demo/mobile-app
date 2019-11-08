@@ -20,10 +20,19 @@ export class MobileServiceConfigurations {
   }
 
   getKeycloakConfig() {
+    if (this.envs['KEYCLOAK'] && this.envs['KEYCLOAK'] === 'true') {
+      return {
+        'auth-server-url': this.envs['AUTH_URL'],
+        realm: this.envs['REALM'],
+        resource: this.envs['CLIENTID']
+      }
+    }
+
     const keycloakConfigs = this.agCoreConfig.getConfigByType('keycloak');
     if (keycloakConfigs && keycloakConfigs.length > 0) {
-      return keycloakConfigs[0];
-    } 
+      return keycloakConfigs[0].config;
+    }
+
     return null;
   }
 

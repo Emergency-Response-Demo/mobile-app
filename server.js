@@ -20,10 +20,16 @@ app.get('/env.js', (_, res) => {
   if (serverUrl && serverUrl.endsWith('/')) {
     serverUrl = serverUrl.slice(0, serverUrl.length -1);
   }
-  const envData = `window.__env = {
-    accessToken: '${process.env.TOKEN}',
-    serverUrl: '${serverUrl}'
-  }`;
+  const data = {
+    accessToken: process.env.TOKEN,
+    serverUrl: serverUrl
+  };
+  ['KEYCLOAK', 'AUTH_URL', 'REALM', 'CLIENTID'].forEach(name => {
+    if (process.env[name]) {
+      data[name] = process.env[name];
+    }
+  });
+  const envData = `window.__env = ${JSON.stringify(data)}`;
   res.send(envData);
 });
 

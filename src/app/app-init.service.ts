@@ -6,27 +6,23 @@ import { MobileServiceConfigurations } from './services/config.service';
   providedIn: 'root'
 })
 export class AppInitService {
-  private options: KeycloakOptions
 
-  constructor(private keycloak: KeycloakService, mobileServicesConfigs: MobileServiceConfigurations) {
-    const mobileServiceKeycloakConfig = mobileServicesConfigs.getKeycloakConfig();
-    if (mobileServiceKeycloakConfig && mobileServiceKeycloakConfig.config) {
-      this.options = {
+  constructor(private keycloak: KeycloakService, private mobileServicesConfigs: MobileServiceConfigurations) {}
+
+  init(): Promise<any> {
+    const mobileServiceKeycloakConfig = this.mobileServicesConfigs.getKeycloakConfig();
+    if (mobileServiceKeycloakConfig) {
+      const options: KeycloakOptions = {
         config: {
-          realm: mobileServiceKeycloakConfig.config.realm,
-          url: mobileServiceKeycloakConfig.config['auth-server-url'],
-          clientId: mobileServiceKeycloakConfig.config.resource
+          realm: mobileServiceKeycloakConfig.realm,
+          url: mobileServiceKeycloakConfig['auth-server-url'],
+          clientId: mobileServiceKeycloakConfig.resource
         },
         initOptions: {
           onLoad: 'login-required'
         }
       }
-    }
-  }
-
-  init(): Promise<any> {
-    if (this.options) {
-      return this.keycloak.init(this.options);
+      return this.keycloak.init(options);
     }
     return Promise.resolve(true);
   }

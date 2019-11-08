@@ -13,6 +13,10 @@ The following environment variables are required to run the app:
 ```bash
 export TOKEN=<mapbox token>
 export SERVER_URL=<url of the current emergency console app>
+export KEYCLOAK=true
+export AUTH_URL=<auth url of keycloak>
+export REALM=<keycloak realm>
+export CLIENTID=<keycloak client id>
 ```
 
 The app is using the same server that is used by the current emergency console app, that's why its url is required here.

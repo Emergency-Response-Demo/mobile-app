@@ -32,13 +32,36 @@ const mockEmptyConfig = {
 };
 
 describe('ConfigService', () => {
+
+  beforeEach(() => {
+    window['__env'] = null;
+  });
+
   it('#getKeycloakConfig should return data', () => {
     const service = new MobileServiceConfigurations(mockFullConfig) 
-    expect(service.getKeycloakConfig()).toEqual(mockFullConfig.services[0]);
+    expect(service.getKeycloakConfig()).toEqual(mockFullConfig.services[0].config);
   });
 
   it('#getKeycloakConfig should return null', () => {
     const service = new MobileServiceConfigurations(mockEmptyConfig) 
     expect(service.getKeycloakConfig()).toBeNull();
+  });
+
+  it('#getKeycloakConfig from env vars', () => {
+    const keycloakEnvs = {
+      KEYCLOAK: 'true',
+      AUTH_URL: 'https://sso.test.example.com/auth',
+      REALM: 'app1-realm-test',
+      CLIENTID: 'app1-client-test'
+    };
+
+    window['__env'] = keycloakEnvs;
+
+    const service = new MobileServiceConfigurations(mockFullConfig);
+    const loadedConfig = service.getKeycloakConfig();
+    //the values in the env vars should take precedence over the configuration file
+    expect(loadedConfig['auth-server-url']).toEqual(keycloakEnvs.AUTH_URL);
+    expect(loadedConfig['resource']).toEqual(keycloakEnvs.CLIENTID);
+    expect(loadedConfig['realm']).toEqual(keycloakEnvs.REALM);
   });
 });

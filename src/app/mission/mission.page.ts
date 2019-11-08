@@ -181,13 +181,14 @@ export class MissionPage implements OnInit, OnDestroy {
   async ngOnInit() {
     const isLoggedIn = await this.keycloak.isLoggedIn();
     if (!isLoggedIn) {
+      this.presentAlert('Login Required', 'Please login first.');
       return;
     }
     const profile = await this.keycloak.loadUserProfile();
     const responderName = `${profile.firstName} ${profile.lastName}`;
     this.responder = await this.responderService.getByName(responderName);
     if (this.responder.longitude === null) {
-      await this.presentAlert();
+      await this.presentAlert('Your location is not set.', 'Set your location by clicking on the map.');
     }
     // Watch missions filtered by the current responders ID.
     this.missionService.watchByResponder(this.responder).subscribe(this.handleMissionStatusUpdate.bind(this));
@@ -204,11 +205,11 @@ export class MissionPage implements OnInit, OnDestroy {
     this.socket.removeAllListeners();
   }
 
-  async presentAlert() {
+  async presentAlert(subHeader: string, message: string) {
     const alert = await this.alertController.create({
       header: 'Alert',
-      subHeader: 'Your location is not set.',
-      message: 'Set your location by clicking on the map.',
+      subHeader: subHeader,
+      message: message,
       buttons: ['OK']
     });
     await alert.present();

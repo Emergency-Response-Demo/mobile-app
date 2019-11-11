@@ -26,6 +26,10 @@ import { MobileServiceConfigurations } from '../services/config.service';
   styleUrls: ['mission.page.scss'],
 })
 export class MissionPage implements OnInit, OnDestroy {
+  static DEFAULT_PHONE_NUMBER = '001001001';
+  static DEFAULT_BOAT_CAPACITY = 12;
+  static DEFAULT_MEDICAL_KIT = true;
+  
   map: Map;
   isLoading = false;
   responder: Responder = new Responder();
@@ -120,7 +124,11 @@ export class MissionPage implements OnInit, OnDestroy {
   }
 
   async handleMissionStatusUpdate(mission: Mission, showMessages: boolean = true): Promise<void> {
-    if (mission === null || mission.status === 'COMPLETED') {
+    if (!mission) {
+      this.isLoading = this.responder.enrolled;
+      return;
+    }
+    if (mission.status === 'COMPLETED') {
       if (showMessages) {
         this.messageService.success('Mission complete');
       }
@@ -153,7 +161,6 @@ export class MissionPage implements OnInit, OnDestroy {
     this.pickupData = { ...this.pickupData };
 
     this.bounds = AppUtil.getBounds(mapRoute.pickupRoute.concat(mapRoute.deliverRoute));
-    this.isLoading = false;
 
     this.incident = await this.incidentService.getById(this.incident.id) || new Incident();
   }
@@ -186,10 +193,15 @@ export class MissionPage implements OnInit, OnDestroy {
     }
     const profile = await this.keycloak.loadUserProfile();
     const responderName = `${profile.firstName} ${profile.lastName}`;
-    this.responder = await this.responderService.getByName(responderName);
+    let responder = await this.responderService.getByName(responderName);
+    if (responder.id === 0) {
+      responder = await this.registerResponder(profile);
+    }
+    this.responder = responder;
     if (this.responder.longitude === null) {
       await this.presentAlert('Your location is not set.', 'Set your location by clicking on the map.');
     }
+    this.isLoading = this.responder.enrolled;
     // Watch missions filtered by the current responders ID.
     this.missionService.watchByResponder(this.responder).subscribe(this.handleMissionStatusUpdate.bind(this));
     // Watch for location update events on the current responder.
@@ -213,5 +225,35 @@ export class MissionPage implements OnInit, OnDestroy {
       buttons: ['OK']
     });
     await alert.present();
+  }
+
+  async registerResponder(profile: Keycloak.KeycloakProfile): Promise<Responder> {
+    const fullName = `${profile.firstName} ${profile.lastName}`;
+    const responder = new Responder();
+    responder.name = fullName;
+    responder.phoneNumber = MissionPage.DEFAULT_PHONE_NUMBER;
+    responder.boatCapacity = MissionPage.DEFAULT_BOAT_CAPACITY;
+    responder.medicalKit = MissionPage.DEFAULT_MEDICAL_KIT;
+    if (profile && profile['attributes']) {
+      const attrs = profile['attributes'];
+      if (attrs.phoneNumber && attrs.phoneNumber[0]) {
+        responder.phoneNumber = attrs.phoneNumber[0];
+      }
+      if (attrs.boatCapacity && attrs.boatCapacity[0]) {
+        // clamp between 0 and 12
+        const boatCapacity = attrs.boatCapacity[0] <= 0 ? 0 : attrs.boatCapacity[0] >= 12 ? 12 : attrs.boatCapacity[0];
+        responder.boatCapacity = boatCapacity;
+      }
+      if (attrs.medical && attrs.medical[0]) {
+        responder.medicalKit = attrs.medical[0];
+      }
+    }
+    responder.enrolled = false;
+    responder.person = true;
+    responder.available = true;
+    this.messageService.info('Registering as new responder');
+    await this.responderService.add(responder);
+    this.messageService.success(`Succesfully registered ${fullName}`);
+    return await this.responderService.getByName(fullName);
   }
 }

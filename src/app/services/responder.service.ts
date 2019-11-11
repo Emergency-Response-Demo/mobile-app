@@ -22,6 +22,14 @@ export class ResponderService {
     ).toPromise();
   }
 
+  async add(responder: Responder): Promise<any> {
+    delete responder.id;
+    const url = `${this.serverConfig.getServerUrl()}/responder-service/responder`;
+    return this.http.post<any>(url, responder).pipe(
+      catchError(res => this.handleError('add()', res))
+    ).toPromise();
+  }
+
   async update(responder: Responder): Promise<any> {
     const url = `${this.serverConfig.getServerUrl()}/responder-service/responder`;
     return this.http.put<any>(url, responder).pipe(

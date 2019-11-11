@@ -90,6 +90,6 @@
   color="primary" 
   (click)="doPickedUp()"
   *ngIf="missionStatus === 'CREATED'"
-  [disabled]="isLoading || !onWaypoint()">
+  [disabled]="!onWaypoint()">
   Picked up
 </ion-button>
